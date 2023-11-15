@@ -18,9 +18,12 @@ class Analise:
         # powershell command: Get_WinEvent reads logs, Select-Object takes only first 100 and gives it to name_log_txt
         command = self.__command
         # running powershell as administrator and giving it order to execute command
+        #process = subprocess.Popen(
+        #    ["powershell", "-Command", "Start-Process", "powershell", "-Verb", "RunAs", "-ArgumentList",
+        #     f"'-Command {command}'"], shell=True)
         process = subprocess.Popen(
             ["powershell", "-Command", "Start-Process", "powershell", "-Verb", "RunAs", "-ArgumentList",
-             f"'-Command {command}'"], shell=True)
+             f"'-Command {command}'", "-WindowStyle", "Hidden"], creationflags=subprocess.CREATE_NO_WINDOW, shell=True)
         output, error = process.communicate()
 
 # class which is made for automatic change of wallpaper
