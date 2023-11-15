@@ -3,7 +3,7 @@ import os
 import datetime
 import ctypes
 
-# class which is made for automatic change of wallpaper
+# class which is made for automatic change of wallpaperr
 class Wall:
     def __init__(self):
         self.__path_to_dir = "D:\\tapety"
