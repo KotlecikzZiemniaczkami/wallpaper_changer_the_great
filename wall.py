@@ -77,6 +77,6 @@ class Wall:
         self.__new_wallpaper = self.__path_to_dir + '\\' + self.__new_wallpaper
         self.__new_wallpaper = str(self.__new_wallpaper)
 
-        # to keep wallpaper after restart last argument have to be one
+        # to keep wallpaper after restart last argument have to be one (?)
         ctypes.windll.user32.SystemParametersInfoW(20, 0, self.__new_wallpaper, 1)
 
