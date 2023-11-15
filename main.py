@@ -3,7 +3,7 @@ import os
 import datetime
 import ctypes
 import subprocess
-
+import chardet
 
 # class which has to analyse logs
 class Analise:
@@ -11,20 +11,28 @@ class Analise:
         self.__path_to_txt_logs_dir = "D:\\odczytane_logi"
         self.__name_log_txt = "myLogs.txt"
         self.__command = 'Get-WinEvent -LogName Security | Select-Object -First 100 > ' + self.__path_to_txt_logs_dir + '\\' + self.__name_log_txt
+        self.__content = ''
 
     # method which will be reading security logs and rewriting first 100 to name_log_txt file using command artifact
     # located in path_to_txt_logs_dir
-    def logs_reading(self):
+    def __logs_reading(self):
         # powershell command: Get_WinEvent reads logs, Select-Object takes only first 100 and gives it to name_log_txt
         command = self.__command
         # running powershell as administrator and giving it order to execute command
-        #process = subprocess.Popen(
-        #    ["powershell", "-Command", "Start-Process", "powershell", "-Verb", "RunAs", "-ArgumentList",
-        #     f"'-Command {command}'"], shell=True)
         process = subprocess.Popen(
             ["powershell", "-Command", "Start-Process", "powershell", "-Verb", "RunAs", "-ArgumentList",
              f"'-Command {command}'", "-WindowStyle", "Hidden"], creationflags=subprocess.CREATE_NO_WINDOW, shell=True)
         output, error = process.communicate()
+
+    # method which is detecting how txt file was encoded and decode it
+    def __encode_in(self):
+        with open(self.__path_to_txt_logs_dir + '\\' + self.__name_log_txt, 'rb') as file:
+            self.__content = file.read()
+        encoding = chardet.detect(self.__content)['encoding']
+        self.__content = self.__content.decode('UTF-16')
+
+
+
 
 # class which is made for automatic change of wallpaper
 class Wall:
@@ -142,3 +150,7 @@ while(1):
     #oWall.change_wallpaper()
     oAnalise.logs_reading()
     time.sleep(10)
+
+
+# TO DO: dodać mechanism analizy pliku wysyłający email jeżeli w pliku tekstowym zostanie wykryty log
+# blednego logowania
