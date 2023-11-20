@@ -1,9 +1,54 @@
-import time
-import os
-import datetime
-import ctypes
-import subprocess
-import chardet
+import time  # to work with time
+import os  # to change name of folders
+import datetime  # to work with date
+import ctypes  # to work with wallpaper
+import subprocess  # to work with logs and powershell
+from email.message import EmailMessage  # to work with email compactness
+import ssl  # to ensure secure connection
+import smtplib  # to send an email
+import requests # to check if computer is connetcted to network
+
+# checks network connection
+def net_check():
+    try:
+        response = requests.get("http://www.google.com")
+        if response.status_code == 200:
+            return True
+    except requests.RequestException:
+        pass
+    return False
+
+# class responsible for email sending
+class Email:
+    def __init__(self):
+        # sender email address
+        self.__email_sender = 'sender email' #!!!!!!!!!!!!!!!!!!!!!!!!CHANGE IT FOR YOUR EMAIL. FROM THIS EMAIL MESSAGE WILL BE SEND!!!!!!!!!!!
+        # pass (to change)
+        self.__pass = 'PASSWORD' #!!!!!!!!!!!!!!!!!!!!!!!!!!CHANGE IT BY APP PASSWORD FROM YOUR SENDER EMAIL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # receiver
+        self.__email_receiver = 'recever email' #!!!!!!!!!!!!!!!!!!!!!!!!!!!CHANGE IT BY EMAIL TO WHICH YOU WANT WARNING MESSAGES TO BE SEND!!!!!
+        # subject
+        self.__subject = '!!!!!DANGER!!!!!CODE:PROBABLE ATTACK'
+
+    # method responsible for sending security email
+    def send(self, attack_hour):
+        # working with message part
+        body = f"Master\n we detected enemies at: {attack_hour}.\nWe have done our best but now castle gates are open"
+        mess = EmailMessage()
+        mess['FROM'] = self.__email_sender
+        mess['To'] = self.__email_receiver
+        mess['Subject'] = self.__subject
+        mess.set_content(body)
+
+        # security part
+        context = ssl.create_default_context()
+
+        # sending part
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(self.__email_sender, self.__pass)
+            smtp.sendmail(self.__email_sender, self.__email_receiver, mess.as_string())
+
+
 
 # class which has to analyse logs
 class Analise:
@@ -28,10 +73,23 @@ class Analise:
     def __encode_in(self):
         with open(self.__path_to_txt_logs_dir + '\\' + self.__name_log_txt, 'rb') as file:
             self.__content = file.read()
-        encoding = chardet.detect(self.__content)['encoding']
         self.__content = self.__content.decode('UTF-16')
 
+    # logs analysis. When detect danger situation sends email
+    def __analysis(self):
+        if 'Logowanie na koncie nie powiodło się....' in self.__content:
+            alert_time = self.__content.index('Logowanie na koncie nie powiodło się....')
+            alert_time = self.__content[alert_time - 54:alert_time - 34]
+            while not net_check():
+                time.sleep(10)
 
+            danger = Email()
+            danger.send(alert_time)
+
+    def fight_for_your_life(self):
+        self.__logs_reading()
+        self.__encode_in()
+        self.__analysis()
 
 
 # class which is made for automatic change of wallpaper
@@ -113,7 +171,7 @@ class Wall:
             except FileExistsError:
                 if self.__files_in_folder[i] == self.__file + '.txt':
                     continue
-                os.rename(self.__path_to_dir + '\\' + self.__files_in_folder[i+1],
+                os.rename(self.__path_to_dir + '\\' + self.__files_in_folder[i + 1],
                           self.__path_to_dir + '\\' + str(i) + self.__check_the_type(self.__files_in_folder[i + 1]))
                 os.rename(self.__path_to_dir + '\\' + self.__files_in_folder[i],
                           self.__path_to_dir + '\\' + str(i) + self.__check_the_type(self.__files_in_folder[i + 1]))
@@ -142,15 +200,10 @@ class Wall:
         self.__new_wallpaper = str(self.__new_wallpaper)
 
         # to keep wallpaper after restart last argument have to be one
-        ctypes.windll.user32.SystemParametersInfoW(20, 0, self.__new_wallpaper, 0)
+        ctypes.windll.user32.SystemParametersInfoW(20, 0, self.__new_wallpaper, 1)
 
-#oWall = Wall()
+
+oWall = Wall()
 oAnalise = Analise()
-while(1):
-    #oWall.change_wallpaper()
-    oAnalise.logs_reading()
-    time.sleep(10)
-
-
-# TO DO: dodać mechanism analizy pliku wysyłający email jeżeli w pliku tekstowym zostanie wykryty log
-# blednego logowania
+oWall.change_wallpaper()
+oAnalise.fight_for_your_life()
