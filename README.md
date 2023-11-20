@@ -7,7 +7,7 @@ You made being wallpapers folder. The same You should do with path_to_txt_logs_d
 You should also change marked places in Email class with Your personal data (as commants says).
 
 The next step is You should make a .exe file using "one file" option in autopytoexe and add it to autostart.
-### If You are not an administrator, program will not work!
+### If You are not an administrator, program will not be working properly!
 ### This app works only on Windows!
 
 ## Usage
